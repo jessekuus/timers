@@ -64,83 +64,85 @@
 
     <script>
         const divisions = [
-            { id: 'm-white', label: 'Male / White belts Open', class: 'white' },
-            { id: 'm-blue', label: 'Male / Blue belts Open', class: 'blue' },
-            { id: 'm-purple', label: 'Male / Purple belts Open', class: 'purple' },
-            { id: 'm-pro', label: 'Male / Brown/Black belts Open', class: 'brown-black' },
-            { id: 'f-white', label: 'Female / White belts Open', class: 'white' },
-            { id: 'f-blue', label: 'Female / Blue belts Open', class: 'blue' },
-            { id: 'f-pro', label: 'Female / Purple/Brown/Black belts Open', class: 'brown-black' }
-        ];
+    { id: 'm-white', label: 'Male / White belts Open', class: 'white' },
+    { id: 'm-blue', label: 'Male / Blue belts Open', class: 'blue' },
+    { id: 'm-purple', label: 'Male / Purple belts Open', class: 'purple' },
+    { id: 'm-pro', label: 'Male / Brown/Black belts Open', class: 'brown-black' },
+    { id: 'f-white', label: 'Female / White belts Open', class: 'white' },
+    { id: 'f-blue', label: 'Female / Blue belts Open', class: 'blue' },
+    { id: 'f-pro', label: 'Female / Purple/Brown/Black belts Open', class: 'brown-black' }
+];
 
-        const grid = document.getElementById('timer-grid');
-        divisions.forEach(div => {
-            grid.innerHTML += `
-                <div class="timer-card ${div.class}">
-                    <div class="category">${div.label.split(' / ')[0]}</div>
-                    <div class="division-name">${div.label.split(' / ')[1]}</div>
-                    <div id="${div.id}-timer" class="time-display">00:00:00</div>
-                    <div class="deadline-label">Closes at: <span id="${div.id}-deadline-text" class="deadline-time">--:--</span></div>
-                    <div class="admin-section">
-                        <label>Change Deadline:</label>
-                        <input type="time" id="${div.id}-input" onchange="saveTime('${div.id}', this.value)">
-                    </div>
-                </div>
-            `;
-        });
+const grid = document.getElementById('timer-grid');
+divisions.forEach(div => {
+    grid.innerHTML += `
+        <div class="timer-card ${div.class}">
+            <div class="category">${div.label.split(' / ')[0]}</div>
+            <div class="division-name">${div.label.split(' / ')[1]}</div>
+            <div id="${div.id}-timer" class="time-display">00:00:00</div>
+            <div class="deadline-label">Closes at: <span id="${div.id}-deadline-text" class="deadline-time">--:--</span></div>
+            <div class="admin-section">
+                <label>Change Deadline:</label>
+                <input type="time" id="${div.id}-input" onchange="saveTime('${div.id}', this.value)">
+            </div>
+        </div>
+    `;
+});
 
-        function loadSavedTimes() {
-            divisions.forEach(div => {
-                const savedValue = localStorage.getItem(`${div.id}-deadline`);
-                const val = savedValue || "12:00";
-                document.getElementById(`${div.id}-input`).value = val;
-                document.getElementById(`${div.id}-deadline-text`).innerText = val;
-            });
+function loadSavedTimes() {
+    divisions.forEach(div => {
+        const savedValue = localStorage.getItem(`${div.id}-deadline`);
+        const val = savedValue || "12:00";
+        document.getElementById(`${div.id}-input`).value = val;
+        document.getElementById(`${div.id}-deadline-text`).innerText = val;
+    });
+}
+
+function saveTime(id, value) {
+    localStorage.setItem(`${id}-deadline`, value);
+    document.getElementById(`${id}-deadline-text`).innerText = value;
+    updateTimers(); 
+}
+
+// NEW PASSWORD PROTECTED TOGGLE
+function toggleAdmin() {
+    const pw = prompt("Enter Admin Password to Edit:");
+    if (pw === "oss") { // Change "oss" to your preferred password
+        const panels = document.querySelectorAll('.admin-section');
+        const isCurrentlyVisible = panels[0].style.display === 'block';
+        panels.forEach(p => p.style.display = isCurrentlyVisible ? 'none' : 'block');
+    } else if (pw !== null) {
+        alert("Incorrect password.");
+    }
+}
+
+function updateTimers() {
+    const now = new Date();
+    divisions.forEach(div => {
+        const inputVal = document.getElementById(`${div.id}-input`).value;
+        const [hours, minutes] = inputVal.split(':');
+        const deadline = new Date();
+        deadline.setHours(hours, minutes, 0);
+
+        const diff = deadline - now;
+        const display = document.getElementById(`${div.id}-timer`);
+
+        if (diff <= 0) {
+            display.innerHTML = "CLOSED";
+            display.style.color = "#ff4444";
+        } else {
+            const h = Math.floor(diff / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+            display.innerHTML = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            display.style.color = "#00ff00";
         }
+    });
+}
 
-        function saveTime(id, value) {
-            localStorage.setItem(`${id}-deadline`, value);
-            document.getElementById(`${id}-deadline-text`).innerText = value;
-            updateTimers(); // Refresh colors immediately
-        }
-
-        function toggleAdmin() {
-            const panels = document.querySelectorAll('.admin-section');
-            const isVisible = panels[0].style.display === 'block';
-            panels.forEach(p => p.style.display = isVisible ? 'none' : 'block');
-        }
-
-        function updateTimers() {
-            const now = new Date();
-
-            divisions.forEach(div => {
-                const inputVal = document.getElementById(`${div.id}-input`).value;
-                const [hours, minutes] = inputVal.split(':');
-                
-                const deadline = new Date();
-                deadline.setHours(hours, minutes, 0);
-
-                const diff = deadline - now;
-                const display = document.getElementById(`${div.id}-timer`);
-
-                if (diff <= 0) {
-                    display.innerHTML = "CLOSED";
-                    display.style.color = "#ff4444";
-                } else {
-                    const h = Math.floor(diff / 3600000);
-                    const m = Math.floor((diff % 3600000) / 60000);
-                    const s = Math.floor((diff % 60000) / 1000);
-                    
-                    display.innerHTML = 
-                        `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-                    display.style.color = "#00ff00";
-                }
-            });
-        }
-
-        loadSavedTimes();
-        setInterval(updateTimers, 1000);
-        updateTimers();
+loadSavedTimes();
+setInterval(updateTimers, 1000);
+updateTimers();
     </script>
 </body>
 </html>
