@@ -12,7 +12,7 @@
         
         .category { font-size: 1.4rem; text-transform: uppercase; color: #00e5ff; letter-spacing: 3px; margin-bottom: 5px; font-weight: 900; }
         .division-name { font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; }
-        .time-display { font-size: 4.5rem; font-weight: bold; margin: 5px 0; font-family: 'Courier New', Courier, monospace; line-height: 1; min-height: 1em; }
+        .time-display { font-size: 4.5rem; font-weight: bold; margin: 5px 0; font-family: 'Courier New', Courier, monospace; line-height: 1; }
         .deadline-label { font-size: 1.2rem; color: #aaa; margin-top: 10px; font-weight: 500; }
         .deadline-time { color: #fff; font-weight: bold; border-bottom: 1px dashed #444; }
         
@@ -40,9 +40,6 @@
     </div>
 
     <script>
-        // ==========================================
-        // CONFIGURATION: PASTE YOUR CSV LINK HERE
-        // ==========================================
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQloAvzDzsFkly9zwBNwCMSsnmF68hfnKRQjKeu4P2r5zH6ksAwdkqua6UE8D36horq__hi0tKUbj8m/pub?output=csv';
 
         const divisions = [
@@ -62,7 +59,7 @@
                     <div class="category">${div.label.split(' / ')[0]}</div>
                     <div class="division-name">${div.label.split(' / ')[1]}</div>
                     <div id="${div.id}-timer" class="time-display">TBD</div>
-                    <div class="deadline-label" id="${div.id}-label">Closes at: <span id="${div.id}-deadline-text" class="deadline-time">--:--</span></div>
+                    <div class="deadline-label" id="${div.id}-label" style="visibility:hidden;">Closes at: <span id="${div.id}-deadline-text" class="deadline-time">--:--</span></div>
                 </div>
             `;
         });
@@ -82,15 +79,17 @@
                     const timerElem = document.getElementById(`${id}-timer`);
                     const labelElem = document.getElementById(`${id}-label`);
 
-                    if (id && textElem) {
-                        // If cell is empty or doesn't have a colon, hide the timer
-                        if (!time || !time.includes(':')) {
-                            textElem.innerText = "--:--";
-                            timerElem.innerText = id.includes('white') ? "SUNDAY" : "TBD";
-                            labelElem.style.visibility = "hidden";
-                        } else {
+                    if (id && textElem && timerElem) {
+                        if (time && time.includes(':')) {
                             textElem.innerText = time;
                             labelElem.style.visibility = "visible";
+                            timerElem.style.color = "#00ff00"; 
+                        } else {
+                            // RESET to TBD/Sunday if sheet is blank or invalid
+                            textElem.innerText = "--:--";
+                            labelElem.style.visibility = "hidden";
+                            timerElem.innerText = id.includes('white') ? "SUNDAY" : "TBD";
+                            timerElem.style.color = "white";
                         }
                     }
                 });
@@ -105,8 +104,8 @@
                 const deadlineText = document.getElementById(`${div.id}-deadline-text`).innerText;
                 const display = document.getElementById(`${div.id}-timer`);
 
-                // If no time is set yet, don't start counting down
-                if (deadlineText === "--:--") return;
+                // CRITICAL FIX: If deadline is blank, don't run the math (Prevents NaN)
+                if (deadlineText === "--:--" || !deadlineText.includes(':')) return;
 
                 const [hours, minutes] = deadlineText.split(':');
                 const deadline = new Date();
