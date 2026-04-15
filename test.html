@@ -69,7 +69,7 @@
         async function syncWithGoogleSheets() {
             try {
                 // Adding a timestamp to the URL prevents the browser from caching old times
-                const response = await fetch(SHEET_CSV_URL + "?t=" + new Date().getTime());
+                const response = await fetch(SHEET_CSV_URL + "&t=" + new Date().getTime());
                 const data = await response.text();
                 const rows = data.split('\n').map(row => row.split(','));
 
