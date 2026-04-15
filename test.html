@@ -9,13 +9,15 @@
         h1 { text-align: right; font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px; margin: 0; color: #fff; flex-grow: 1; padding-left: 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
         .timer-card { background: #1e1e1e; padding: 25px; border-radius: 12px; border-bottom: 12px solid #444; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; }
+        
+        /* Gender/Division Labels */
         .category { font-size: 1.4rem; text-transform: uppercase; color: #00e5ff; letter-spacing: 3px; margin-bottom: 5px; font-weight: 900; }
         .division-name { font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; }
         .time-display { font-size: 4.5rem; font-weight: bold; margin: 5px 0; font-family: 'Courier New', Courier, monospace; line-height: 1; }
         .deadline-label { font-size: 1.2rem; color: #aaa; margin-top: 10px; font-weight: 500; }
         .deadline-time { color: #fff; font-weight: bold; border-bottom: 1px dashed #444; }
         
-        /* Belt Colors */
+        /* Belt Styling */
         .white { border-color: #ffffff; }
         .blue { border-color: #2b59ff; }
         .purple { border-color: #800080; }
@@ -32,16 +34,18 @@
         <h1>Open class registration</h1>
     </header>
 
-    <div class="grid" id="timer-grid"></div>
+    <div class="grid" id="timer-grid">
+        </div>
 
     <div class="info-box">
         ⚠️ <b>Open Class Registration:</b> Please head to the Weigh-in station to register <b>after</b> your first match. You must have competed in your division to be eligible.
     </div>
 
     <script>
-        // --- CONFIGURATION ---
-        // PASTE YOUR PUBLISHED CSV LINK BETWEEN THE QUOTES BELOW:
-        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQloAvzDzsFkly9zwBNwCMSsnmF68hfnKRQjKeu4P2r5zH6ksAwdkqua6UE8D36horq__hi0tKUbj8m/pub?output=csv';
+        // ==========================================
+        // CONFIGURATION: PASTE YOUR CSV LINK HERE
+        // ==========================================
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQloAvzDzsFkly9zwBNwCMSsnmF68hfnKRQjKeu4P2r5zH6ksAwdkqua6UE8D36horq__hi0tKUbj8m/pubhtml';
 
         const divisions = [
             { id: 'm-white', label: 'Male / White belts Open', class: 'white' },
@@ -53,7 +57,7 @@
             { id: 'f-pro', label: 'Female / Purple/Brown/Black belts Open', class: 'brown-black' }
         ];
 
-        // Build the grid
+        // Generate the visual cards on the page
         const grid = document.getElementById('timer-grid');
         divisions.forEach(div => {
             grid.innerHTML += `
@@ -66,26 +70,37 @@
             `;
         });
 
+        // Smart Sync Function: Pulls data from Google and keeps it stable
         async function syncWithGoogleSheets() {
             try {
-                // Adding a timestamp to the URL prevents the browser from caching old times
-                const response = await fetch(SHEET_CSV_URL + "&t=" + new Date().getTime());
+                // Use & if ? exists, otherwise use ?
+                const connector = SHEET_CSV_URL.includes('?') ? '&t=' : '?t=';
+                const response = await fetch(SHEET_CSV_URL + connector + new Date().getTime());
+                
+                if (!response.ok) throw new Error('Network response was not ok');
+                
                 const data = await response.text();
-                const rows = data.split('\n').map(row => row.split(','));
+                const rows = data.split(/\r?\n/).map(row => row.split(','));
 
                 rows.forEach(row => {
-                    const id = row[0] ? row[0].trim() : null;
+                    const id = row[0] ? row[0].trim().toLowerCase() : null;
                     const time = row[1] ? row[1].trim() : null;
-                    if (id && time) {
+                    
+                    // Only update if ID is valid and time contains a colon (e.g., 14:00)
+                    if (id && time && time.includes(':')) {
                         const textElem = document.getElementById(`${id}-deadline-text`);
-                        if (textElem) textElem.innerText = time;
+                        if (textElem) {
+                            textElem.innerText = time;
+                        }
                     }
                 });
+                console.log("Sync successful at: " + new Date().toLocaleTimeString());
             } catch (e) {
-                console.error("Sync error:", e);
+                console.warn("Sync blip (keeping current data):", e);
             }
         }
 
+        // Live Countdown Logic
         function updateTimers() {
             const now = new Date();
             divisions.forEach(div => {
@@ -112,10 +127,13 @@
             });
         }
 
-        // Sync every 20 seconds, update countdown every 1 second
+        // Run sync every 20 seconds, run clock update every 1 second
         setInterval(syncWithGoogleSheets, 20000);
         setInterval(updateTimers, 1000);
+        
+        // Initial run
         syncWithGoogleSheets();
+        updateTimers();
     </script>
 </body>
 </html>
