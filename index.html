@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>FBJJF Open Class Registration</title>
-<style>
+    <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #121212; color: white; padding: 20px; margin: 0; }
         header { display: flex; justify-content: space-between; align-items: center; max-width: 1600px; margin: 0 auto 30px auto; border-bottom: 2px solid #333; padding-bottom: 15px; }
         .fed-logo { height: 100px; width: auto; }
@@ -10,21 +10,25 @@
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
         .timer-card { background: #1e1e1e; padding: 25px; border-radius: 12px; border-bottom: 12px solid #444; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; min-height: 200px; }
         
-        .category { font-size: 1.4rem; text-transform: uppercase; color: #00e5ff; letter-spacing: 3px; margin-bottom: 5px; font-weight: 900; }
+        .category { font-size: 1.4rem; text-transform: uppercase; color: #ffcc00; letter-spacing: 3px; margin-bottom: 5px; font-weight: 900; }
         
-        /* Fixed height here keeps the timers aligned */
-       .division-name { 
-            font-size: 1.5rem; 
+        /* Fixed alignment for belt names */
+        .division-name { 
+            font-size: 1.2rem; 
             font-weight: bold; 
-            margin-bottom: 0px; /* Removed margin to save height */
-            line-height: 1.2;
+            margin-bottom: 0px; 
+            line-height: 1.1; 
+            min-height: 3.5rem; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
         }
 
+        /* Narrower monospace font to prevent overflow */
         .time-display { 
-            font-size: 4.2rem; /* Slightly smaller to ensure it never overflows */
+            font-size: 4rem; 
             font-weight: bold; 
-            padding-top: 15px; /* This pushes the text down inside the box */
-            margin-bottom: 5px; 
+            margin: 10px 0 5px 0; 
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace; 
             line-height: 1; 
         }
@@ -98,12 +102,10 @@
                         if (time && time.includes(':')) {
                             textElem.innerText = time;
                             labelElem.style.visibility = "visible";
-                            timerElem.style.color = "#00ff00"; 
+                            // Color is handled by updateTimers tick
                         } else {
-                            // RESET to SATURDAY/SUNDAY if sheet is blank or invalid
                             textElem.innerText = "--:--";
                             labelElem.style.visibility = "hidden";
-                            // LOGIC CHANGE: White belts show SUNDAY, all others show SATURDAY
                             timerElem.innerText = id.includes('white') ? "SUNDAY" : "SATURDAY";
                             timerElem.style.color = "white";
                         }
@@ -130,13 +132,19 @@
 
                 if (diff <= 0) {
                     display.innerHTML = "CLOSED";
-                    display.style.color = "#ff4444";
+                    display.style.color = "#ff4444"; // Red
+                } else if (diff <= 300000) { // 5 Minute Warning
+                    const h = Math.floor(diff / 3600000);
+                    const m = Math.floor((diff % 3600000) / 60000);
+                    const s = Math.floor((diff % 60000) / 1000);
+                    display.innerHTML = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                    display.style.color = "#ffff00"; // Yellow
                 } else {
                     const h = Math.floor(diff / 3600000);
                     const m = Math.floor((diff % 3600000) / 60000);
                     const s = Math.floor((diff % 60000) / 1000);
                     display.innerHTML = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-                    display.style.color = "#00ff00";
+                    display.style.color = "#00ff00"; // Green
                 }
             });
         }
