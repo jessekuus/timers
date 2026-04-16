@@ -85,10 +85,11 @@
                             labelElem.style.visibility = "visible";
                             timerElem.style.color = "#00ff00"; 
                         } else {
-                            // RESET to TBD/Sunday if sheet is blank or invalid
+                            // RESET to SATURDAY/SUNDAY if sheet is blank or invalid
                             textElem.innerText = "--:--";
                             labelElem.style.visibility = "hidden";
-                            timerElem.innerText = id.includes('white') ? "SUNDAY" : "TBD";
+                            // LOGIC CHANGE: White belts show SUNDAY, all others show SATURDAY
+                            timerElem.innerText = id.includes('white') ? "SUNDAY" : "SATURDAY";
                             timerElem.style.color = "white";
                         }
                     }
@@ -104,7 +105,6 @@
                 const deadlineText = document.getElementById(`${div.id}-deadline-text`).innerText;
                 const display = document.getElementById(`${div.id}-timer`);
 
-                // CRITICAL FIX: If deadline is blank, don't run the math (Prevents NaN)
                 if (deadlineText === "--:--" || !deadlineText.includes(':')) return;
 
                 const [hours, minutes] = deadlineText.split(':');
