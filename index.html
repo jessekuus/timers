@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>FBJJF Open Class Registration</title>
-    <style>
+<style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #121212; color: white; padding: 20px; margin: 0; }
         header { display: flex; justify-content: space-between; align-items: center; max-width: 1600px; margin: 0 auto 30px auto; border-bottom: 2px solid #333; padding-bottom: 15px; }
         .fed-logo { height: 100px; width: auto; }
@@ -10,13 +10,32 @@
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
         .timer-card { background: #1e1e1e; padding: 25px; border-radius: 12px; border-bottom: 12px solid #444; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; min-height: 200px; }
         
-        .category { font-size: 1.4rem; text-transform: uppercase; color: #ffcc00; letter-spacing: 3px; margin-bottom: 5px; font-weight: 900; }
-        .division-name { font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; }
-        .time-display { font-size: 4.5rem; font-weight: bold; margin: 5px 0; font-family: 'Courier New', Courier, monospace; line-height: 1; }
+        .category { font-size: 1.4rem; text-transform: uppercase; color: #00e5ff; letter-spacing: 3px; margin-bottom: 5px; font-weight: 900; }
+        
+        /* Fixed height here keeps the timers aligned */
+        .division-name { 
+            font-size: 1.5rem; 
+            font-weight: bold; 
+            margin-bottom: 10px; 
+            min-height: 4rem; /* Adjust this if text still overlaps */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Modern font and spacing for the timer */
+        .time-display { 
+            font-size: 4.5rem; 
+            font-weight: bold; 
+            margin: 20px 0 5px 0; 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            font-feature-settings: "tnum"; 
+            line-height: 1; 
+        }
+
         .deadline-label { font-size: 1.2rem; color: #aaa; margin-top: 10px; font-weight: 500; }
         .deadline-time { color: #fff; font-weight: bold; border-bottom: 1px dashed #444; }
         
-        /* Belt Styling */
         .white { border-color: #ffffff; }
         .blue { border-color: #2b59ff; }
         .purple { border-color: #800080; }
