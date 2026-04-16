@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FBJJF Open Class Registration</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #121212; color: white; padding: 20px; margin: 0; }
+        
+        /* CENTERED HEADER LOGIC */
+        header { 
+            display: flex; 
+            flex-direction: column; /* Stack logo on top of text */
+            align-items: center; 
+            justify-content: center;
+            max-width: 1600px; 
+            margin: 0 auto 30px auto; 
+            border-bottom: 2px solid #333; 
+            padding-bottom: 20px; 
+        }
+        .fed-logo { height: 120px; width: auto; margin-bottom: 15px; }
+        h1 { 
+            text-align: center; 
+            font-size: 2.8rem; 
+            text-transform: uppercase; 
+            letter-spacing: 4px; 
+            margin: 0; 
+            color: #fff; 
+        }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
+        .timer-card { background: #1e1e1e; padding: 25px; border-radius: 12px; border-bottom: 12px solid #444; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; min-height: 200px; }
+        
+        .category { font-size: 1.4rem; text-transform: uppercase; color: #00e5ff; letter-spacing: 3px; margin-bottom: 5px; font-weight: 900; }
+        .division-name { font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; }
+        .time-display { font-size: 4.5rem; font-weight: bold; margin: 5px 0; font-family: 'Courier New', Courier, monospace; line-height: 1; }
+        .deadline-label { font-size: 1.2rem; color: #aaa; margin-top: 10px; font-weight: 500; }
+        .deadline-time { color: #fff; font-weight: bold; border-bottom: 1px dashed #444; }
+        
+        /* Belt Styling */
+        .white { border-color: #ffffff; }
+        .blue { border-color: #2b59ff; }
+        .purple { border-color: #800080; }
+        .brown-black { border-color: #4a3321; }
+
+        .info-box { max-width: 900px; margin: 30px auto; padding: 20px; background: #1a1a1a; border: 2px solid #555; border-radius: 10px; text-align: center; font-size: 1.1rem; color: #ccc; }
+        
+        /* Announcement Box Styling */
+        #announcement-container { display: none; max-width: 1200px; margin: 20px auto; padding: 25px; background: #900; border: 4px solid #f00; border-radius: 15px; text-align: center; box-shadow: 0 0 30px rgba(255, 0, 0, 0.4); }
+        #announcement-text { font-size: 2.2rem; font-weight: bold; color: #fff; text-transform: uppercase; margin: 0; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="https://bjjliitto.fi/vir_tied/SBJJL%20Logo.png" alt="FBJJF Logo" class="fed-logo">
+        <h1>Open class registration</h1>
+    </header>
+
+    <div class="grid" id="timer-grid"></div>
+
+    <div id="announcement-container">
+        <p id="announcement-text"></p>
+    </div>
+
+    <div class="info-box">
+        ⚠️ <b>Reminder:</b> Please register at the weigh-in station <b>after</b> your first match. You must have competed in your division to be eligible.
+    </div>
+
+    <script>
+        // --- PASTE YOUR CSV LINK HERE ---
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQloAvzDzsFkly9zwBNwCMSsnmF68hfnKRQjKeu4P2r5zH6ksAwdkqua6UE8D36horq__hi0tKUbj8m/pub?output=csv';
+
+        const divisions = [
+            { id: 'm-white', label: 'Male / White belts Open', class: 'white' },
+            { id: 'm-blue', label: 'Male / Blue belts Open', class: 'blue' },
+            { id: 'm-purple', label: 'Male / Purple belts Open', class: 'purple' },
+            { id: 'm-pro', label: 'Male / Brown/Black belts Open', class: 'brown-black' },
+            { id: 'f-white', label: 'Female / White belts Open', class: 'white' },
+            { id: 'f-blue', label: 'Female / Blue belts Open', class: 'blue' },
+            { id: 'f-pro', label: 'Female / Purple/Brown/Black belts Open', class: 'brown-black' }
+        ];
+
+        const grid = document.getElementById('timer-grid');
+        divisions.forEach(div => {
+            grid.innerHTML += `
+                <div class="timer-card ${div.class}" id="card-${div.id}">
+                    <div class="category">${div.label.split(' / ')[0]}</div>
+                    <div class="division-name">${div.label.split(' / ')[1]}</div>
+                    <div id="${div.id}-timer" class="time-display">TBD</div>
+                    <div class="deadline-label" id="${div.id}-label" style="visibility:hidden;">Closes at: <span id="${div.id}-deadline-text" class="deadline-time">--:--</span></div>
+                </div>
+            `;
+        });
+
+        async function syncWithGoogleSheets() {
+            try {
+                const connector = SHEET_CSV_URL.includes('?') ? '&t=' : '?t=';
+                const response = await fetch(SHEET_CSV_URL + connector + new Date().getTime());
+                const data = await response.text();
+                const rows = data.split(/\r?\n/).map(row => row.split(','));
+
+                rows.forEach(row => {
+                    const id = row[0] ? row[0].trim().toLowerCase() : null;
+                    const val = row[1] ? row[1].trim() : null;
+                    
+                    if (id === 'announcement') {
+                        const container = document.getElementById('announcement-container');
+                        const textElem = document.getElementById('announcement-text');
+                        if (val && val.length > 1) {
+                            container.style.display = "block";
+                            textElem.innerText = "📢 " + val;
+                        } else {
+                            container.style.display = "none";
+                        }
+                        return;
+                    }
+
+                    const textElem = document.getElementById(`${id}-deadline-text`);
+                    const timerElem = document.getElementById(`${id}-timer`);
+                    const labelElem = document.getElementById(`${id}-label`);
+
+                    if (id && textElem && timerElem) {
+                        if (val && val.includes(':')) {
+                            textElem.innerText = val;
+                            labelElem.style.visibility = "visible";
+                            timerElem.style.color = "#00ff00"; 
+                        } else {
+                            textElem.innerText = "--:--";
+                            labelElem.style.visibility = "hidden";
+                            timerElem.style.color = "white";
+                            timerElem.innerText = id.includes('white') ? "SUNDAY" : "SATURDAY";
+                        }
+                    }
+                });
+            } catch (e) {
+                console.warn("Sync error:", e);
+            }
+        }
+
+        function updateTimers() {
+            const now = new Date();
+            divisions.forEach(div => {
+                const deadlineText = document.getElementById(`${div.id}-deadline-text`).innerText;
+                const display = document.getElementById(`${div.id}-timer`);
+
+                if (deadlineText === "--:--" || !deadlineText.includes(':')) return;
+
+                const [hours, minutes] = deadlineText.split(':');
+                const deadline = new Date();
+                deadline.setHours(parseInt(hours), parseInt(minutes), 0);
+
+                const diff = deadline - now;
+
+                if (diff <= 0) {
+                    display.innerHTML = "CLOSED";
+                    display.style.color = "#ff4444";
+                } else {
+                    const h = Math.floor(diff / 3600000);
+                    const m = Math.floor((diff % 3600000) / 60000);
+                    const s = Math.floor((diff % 60000) / 1000);
+                    display.innerHTML = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                    display.style.color = "#00ff00";
+                }
+            });
+        }
+
+        setInterval(syncWithGoogleSheets, 20000);
+        setInterval(updateTimers, 1000);
+        syncWithGoogleSheets();
+    </script>
+</body>
+</html>
