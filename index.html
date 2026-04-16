@@ -4,93 +4,44 @@
     <title>FBJJF Open Class Registration</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #121212; color: white; padding: 20px; margin: 0; }
-        
-        header { 
-            display: flex; justify-content: space-between; align-items: center; 
-            max-width: 1600px; margin: 0 auto 30px auto; border-bottom: 2px solid #333; padding-bottom: 15px;
-        }
-
+        header { display: flex; justify-content: space-between; align-items: center; max-width: 1600px; margin: 0 auto 30px auto; border-bottom: 2px solid #333; padding-bottom: 15px; }
         .fed-logo { height: 100px; width: auto; }
-
-        h1 { 
-            text-align: right; font-size: 2.5rem; text-transform: uppercase; 
-            letter-spacing: 2px; margin: 0; color: #fff; flex-grow: 1; padding-left: 20px;
-        }
-        
-        .admin-toggle {
-            display: block; margin: 0 auto 30px auto; background: #333; color: #aaa; border: 1px solid #444; 
-            padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.9rem;
-        }
-
+        h1 { text-align: right; font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px; margin: 0; color: #fff; flex-grow: 1; padding-left: 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
+        .timer-card { background: #1e1e1e; padding: 25px; border-radius: 12px; border-bottom: 12px solid #444; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; min-height: 200px; }
         
-        .timer-card { 
-            background: #1e1e1e; padding: 25px; border-radius: 12px; 
-            border-bottom: 12px solid #444; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            text-align: center;
-        }
-
+        .category { font-size: 1.4rem; text-transform: uppercase; color: #ffcc00; letter-spacing: 3px; margin-bottom: 5px; font-weight: 900; }
+        .division-name { font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; }
+        .time-display { font-size: 4.5rem; font-weight: bold; margin: 5px 0; font-family: 'Courier New', Courier, monospace; line-height: 1; }
+        .deadline-label { font-size: 1.2rem; color: #aaa; margin-top: 10px; font-weight: 500; }
+        .deadline-time { color: #fff; font-weight: bold; border-bottom: 1px dashed #444; }
+        
         /* Belt Styling */
         .white { border-color: #ffffff; }
         .blue { border-color: #2b59ff; }
         .purple { border-color: #800080; }
         .brown-black { border-color: #4a3321; }
 
-        /* Gender Label - Highly Visible */
-        .category { 
-            font-size: 1.4rem; 
-            text-transform: uppercase; 
-            color: #00e5ff; 
-            letter-spacing: 3px; 
-            margin-bottom: 5px; 
-            font-weight: 900; 
-        }
-
-        .division-name { font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; }
-        
-        .time-display { font-size: 4.5rem; font-weight: bold; margin: 5px 0; font-family: 'Courier New', Courier, monospace; line-height: 1; }
-        
-        .deadline-label { font-size: 1.2rem; color: #aaa; margin-top: 10px; font-weight: 500; }
-        .deadline-time { color: #fff; font-weight: bold; border-bottom: 1px dashed #444; }
-
-        /* The Info Box */
-        .info-box {
-            max-width: 900px;
-            margin: 50px auto;
-            padding: 30px;
-            background: #1a1a1a;
-            border: 3px solid #ffcc00; 
-            border-radius: 15px;
-            text-align: center;
-            font-size: 1.4rem;
-            line-height: 1.6;
-            box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
-        }
-
+        .info-box { max-width: 900px; margin: 50px auto; padding: 30px; background: #1a1a1a; border: 3px solid #ffcc00; border-radius: 15px; text-align: center; font-size: 1.4rem; line-height: 1.6; box-shadow: 0 0 20px rgba(255, 204, 0, 0.2); }
         .info-box b { color: #ffcc00; text-transform: uppercase; text-decoration: underline; }
-
-        .admin-section { background: #2a2a2a; margin-top: 20px; padding: 15px; border-radius: 8px; display: none; }
-        input[type="time"] { width: 100%; padding: 10px; font-size: 1.2rem; border-radius: 4px; border: none; box-sizing: border-box; }
-        label { display: block; margin-bottom: 5px; font-size: 0.8rem; color: #aaa; text-align: left; }
     </style>
 </head>
 <body>
 
     <header>
-        <img src="https://bjjliitto.fi/vir_tied/SBJJL%20Logo.png" class="fed-logo">
+        <img src="https://bjjliitto.fi/vir_tied/SBJJL%20Logo.png" alt="FBJJF Logo" class="fed-logo">
         <h1>Open class registration</h1>
     </header>
-    
-    <button class="admin-toggle" onclick="toggleAdmin()">⚙️ Edit Deadlines</button>
 
-    <div class="grid" id="timer-grid">
-        </div>
+    <div class="grid" id="timer-grid"></div>
 
     <div class="info-box">
         ⚠️ <b>Open Class Registration:</b> Please head to the Weigh-in station to register <b>after</b> your first match. You must have competed in your division to be eligible.
     </div>
 
     <script>
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQloAvzDzsFkly9zwBNwCMSsnmF68hfnKRQjKeu4P2r5zH6ksAwdkqua6UE8D36horq__hi0tKUbj8m/pub?output=csv';
+
         const divisions = [
             { id: 'm-white', label: 'Male / White belts Open', class: 'white' },
             { id: 'm-blue', label: 'Male / Blue belts Open', class: 'blue' },
@@ -104,55 +55,63 @@
         const grid = document.getElementById('timer-grid');
         divisions.forEach(div => {
             grid.innerHTML += `
-                <div class="timer-card ${div.class}">
+                <div class="timer-card ${div.class}" id="card-${div.id}">
                     <div class="category">${div.label.split(' / ')[0]}</div>
                     <div class="division-name">${div.label.split(' / ')[1]}</div>
-                    <div id="${div.id}-timer" class="time-display">00:00:00</div>
-                    <div class="deadline-label">Closes at: <span id="${div.id}-deadline-text" class="deadline-time">--:--</span></div>
-                    <div class="admin-section">
-                        <label>Change Deadline:</label>
-                        <input type="time" id="${div.id}-input" onchange="saveTime('${div.id}', this.value)">
-                    </div>
+                    <div id="${div.id}-timer" class="time-display">TBD</div>
+                    <div class="deadline-label" id="${div.id}-label" style="visibility:hidden;">Closes at: <span id="${div.id}-deadline-text" class="deadline-time">--:--</span></div>
                 </div>
             `;
         });
 
-        function loadSavedTimes() {
-            divisions.forEach(div => {
-                const savedValue = localStorage.getItem(`${div.id}-deadline`);
-                const val = savedValue || "12:00";
-                document.getElementById(`${div.id}-input`).value = val;
-                document.getElementById(`${div.id}-deadline-text`).innerText = val;
-            });
-        }
+        async function syncWithGoogleSheets() {
+            try {
+                const connector = SHEET_CSV_URL.includes('?') ? '&t=' : '?t=';
+                const response = await fetch(SHEET_CSV_URL + connector + new Date().getTime());
+                const data = await response.text();
+                const rows = data.split(/\r?\n/).map(row => row.split(','));
 
-        function saveTime(id, value) {
-            localStorage.setItem(`${id}-deadline`, value);
-            document.getElementById(`${id}-deadline-text`).innerText = value;
-            updateTimers(); 
-        }
+                rows.forEach(row => {
+                    const id = row[0] ? row[0].trim().toLowerCase() : null;
+                    const time = row[1] ? row[1].trim() : null;
+                    
+                    const textElem = document.getElementById(`${id}-deadline-text`);
+                    const timerElem = document.getElementById(`${id}-timer`);
+                    const labelElem = document.getElementById(`${id}-label`);
 
-        function toggleAdmin() {
-            const pw = prompt("Enter Admin Password to Edit:");
-            if (pw === "oss") { 
-                const panels = document.querySelectorAll('.admin-section');
-                const isVisible = panels[0].style.display === 'block';
-                panels.forEach(p => p.style.display = isVisible ? 'none' : 'block');
-            } else if (pw !== null) {
-                alert("Incorrect password.");
+                    if (id && textElem && timerElem) {
+                        if (time && time.includes(':')) {
+                            textElem.innerText = time;
+                            labelElem.style.visibility = "visible";
+                            timerElem.style.color = "#00ff00"; 
+                        } else {
+                            // RESET to SATURDAY/SUNDAY if sheet is blank or invalid
+                            textElem.innerText = "--:--";
+                            labelElem.style.visibility = "hidden";
+                            // LOGIC CHANGE: White belts show SUNDAY, all others show SATURDAY
+                            timerElem.innerText = id.includes('white') ? "SUNDAY" : "SATURDAY";
+                            timerElem.style.color = "white";
+                        }
+                    }
+                });
+            } catch (e) {
+                console.warn("Sync error:", e);
             }
         }
 
         function updateTimers() {
             const now = new Date();
             divisions.forEach(div => {
-                const inputVal = document.getElementById(`${div.id}-input`).value;
-                const [hours, minutes] = inputVal.split(':');
+                const deadlineText = document.getElementById(`${div.id}-deadline-text`).innerText;
+                const display = document.getElementById(`${div.id}-timer`);
+
+                if (deadlineText === "--:--" || !deadlineText.includes(':')) return;
+
+                const [hours, minutes] = deadlineText.split(':');
                 const deadline = new Date();
-                deadline.setHours(hours, minutes, 0);
+                deadline.setHours(parseInt(hours), parseInt(minutes), 0);
 
                 const diff = deadline - now;
-                const display = document.getElementById(`${div.id}-timer`);
 
                 if (diff <= 0) {
                     display.innerHTML = "CLOSED";
@@ -167,9 +126,9 @@
             });
         }
 
-        loadSavedTimes();
+        setInterval(syncWithGoogleSheets, 20000);
         setInterval(updateTimers, 1000);
-        updateTimers();
+        syncWithGoogleSheets();
     </script>
 </body>
 </html>
