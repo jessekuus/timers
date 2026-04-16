@@ -11,12 +11,31 @@
         .timer-card { background: #1e1e1e; padding: 25px; border-radius: 12px; border-bottom: 12px solid #444; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; min-height: 200px; }
         
         .category { font-size: 1.4rem; text-transform: uppercase; color: #ffcc00; letter-spacing: 3px; margin-bottom: 5px; font-weight: 900; }
-        .division-name { font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; }
-        .time-display { font-size: 4.5rem; font-weight: bold; margin: 5px 0; font-family: 'Courier New', Courier, monospace; line-height: 1; }
+        
+        /* Fixed alignment for belt names */
+        .division-name { 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            margin-bottom: 0px; 
+            line-height: 1.1; 
+            min-height: 3.5rem; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+
+        /* Narrower monospace font to prevent overflow */
+        .time-display { 
+            font-size: 4rem; 
+            font-weight: bold; 
+            margin: 10px 0 5px 0; 
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace; 
+            line-height: 1; 
+        }
+
         .deadline-label { font-size: 1.2rem; color: #aaa; margin-top: 10px; font-weight: 500; }
         .deadline-time { color: #fff; font-weight: bold; border-bottom: 1px dashed #444; }
         
-        /* Belt Styling */
         .white { border-color: #ffffff; }
         .blue { border-color: #2b59ff; }
         .purple { border-color: #800080; }
@@ -83,12 +102,10 @@
                         if (time && time.includes(':')) {
                             textElem.innerText = time;
                             labelElem.style.visibility = "visible";
-                            timerElem.style.color = "#00ff00"; 
+                            // Color is handled by updateTimers tick
                         } else {
-                            // RESET to SATURDAY/SUNDAY if sheet is blank or invalid
                             textElem.innerText = "--:--";
                             labelElem.style.visibility = "hidden";
-                            // LOGIC CHANGE: White belts show SUNDAY, all others show SATURDAY
                             timerElem.innerText = id.includes('white') ? "SUNDAY" : "SATURDAY";
                             timerElem.style.color = "white";
                         }
@@ -115,13 +132,19 @@
 
                 if (diff <= 0) {
                     display.innerHTML = "CLOSED";
-                    display.style.color = "#ff4444";
+                    display.style.color = "#ff4444"; // Red
+                } else if (diff <= 300000) { // 5 Minute Warning
+                    const h = Math.floor(diff / 3600000);
+                    const m = Math.floor((diff % 3600000) / 60000);
+                    const s = Math.floor((diff % 60000) / 1000);
+                    display.innerHTML = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                    display.style.color = "#ffff00"; // Yellow
                 } else {
                     const h = Math.floor(diff / 3600000);
                     const m = Math.floor((diff % 3600000) / 60000);
                     const s = Math.floor((diff % 60000) / 1000);
                     display.innerHTML = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-                    display.style.color = "#00ff00";
+                    display.style.color = "#00ff00"; // Green
                 }
             });
         }
