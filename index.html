@@ -13,23 +13,19 @@
         .category { font-size: 1.4rem; text-transform: uppercase; color: #00e5ff; letter-spacing: 3px; margin-bottom: 5px; font-weight: 900; }
         
         /* Fixed height here keeps the timers aligned */
-        .division-name { 
+       .division-name { 
             font-size: 1.5rem; 
             font-weight: bold; 
-            margin-bottom: 10px; 
-            min-height: 4rem; /* Adjust this if text still overlaps */
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            margin-bottom: 0px; /* Removed margin to save height */
+            line-height: 1.2;
         }
 
-        /* Modern font and spacing for the timer */
         .time-display { 
-            font-size: 4.5rem; 
+            font-size: 4.2rem; /* Slightly smaller to ensure it never overflows */
             font-weight: bold; 
-            margin: 20px 0 5px 0; 
-            font-family: 'Segoe UI', Arial, sans-serif; 
-            font-feature-settings: "tnum"; 
+            padding-top: 15px; /* This pushes the text down inside the box */
+            margin-bottom: 5px; 
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace; 
             line-height: 1; 
         }
 
