@@ -4,28 +4,9 @@
     <title>FBJJF Open Class Registration</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #121212; color: white; padding: 20px; margin: 0; }
-        
-        /* HEADER CENTERED */
-        header { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center;
-            max-width: 1600px; 
-            margin: 0 auto 30px auto; 
-            border-bottom: 2px solid #333; 
-            padding-bottom: 20px; 
-        }
-        .fed-logo { height: 120px; width: auto; margin-bottom: 15px; }
-        h1 { 
-            text-align: center; 
-            font-size: 2.8rem; 
-            text-transform: uppercase; 
-            letter-spacing: 4px; 
-            margin: 0; 
-            color: #fff; 
-        }
-
+        header { display: flex; justify-content: space-between; align-items: center; max-width: 1600px; margin: 0 auto 30px auto; border-bottom: 2px solid #333; padding-bottom: 15px; }
+        .fed-logo { height: 100px; width: auto; }
+        h1 { text-align: right; font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px; margin: 0; color: #fff; flex-grow: 1; padding-left: 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
         .timer-card { background: #1e1e1e; padding: 25px; border-radius: 12px; border-bottom: 12px solid #444; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; min-height: 200px; }
         
@@ -48,7 +29,7 @@
 <body>
 
     <header>
-        <img src="https://bjjliitto.fi/vir_tied/SBJJL%20Logo.png" alt="FBJJF Logo" alt="FBJJF Logo" class="fed-logo">
+        <img src="https://bjjliitto.fi/vir_tied/SBJJL%20Logo.png" alt="FBJJF Logo" class="fed-logo">
         <h1>Open class registration</h1>
     </header>
 
@@ -104,11 +85,12 @@
                             labelElem.style.visibility = "visible";
                             timerElem.style.color = "#00ff00"; 
                         } else {
+                            // RESET to SATURDAY/SUNDAY if sheet is blank or invalid
                             textElem.innerText = "--:--";
                             labelElem.style.visibility = "hidden";
-                            timerElem.style.color = "white";
-                            // LOGIC: White = SUNDAY, Others = SATURDAY
+                            // LOGIC CHANGE: White belts show SUNDAY, all others show SATURDAY
                             timerElem.innerText = id.includes('white') ? "SUNDAY" : "SATURDAY";
+                            timerElem.style.color = "white";
                         }
                     }
                 });
