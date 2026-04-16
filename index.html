@@ -6,31 +6,28 @@
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #121212; color: white; padding: 20px; margin: 0; }
         header { display: flex; justify-content: space-between; align-items: center; max-width: 1600px; margin: 0 auto 30px auto; border-bottom: 2px solid #333; padding-bottom: 15px; }
         .fed-logo { height: 100px; width: auto; }
-        h1 { text-align: right; font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px; margin: 0; color: #fff; flex-grow: 1; padding-left: 20px; }
+        h1 { text-align: right; font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px; margin: 0; color: #fff; flex-grow: 1; padding: 0 20px; }
+        
+        /* Status Indicator Styles */
+        .status-container { display: flex; align-items: center; font-size: 0.8rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+        .dot { height: 10px; width: 10px; background-color: #00ff00; border-radius: 50%; margin-right: 8px; box-shadow: 0 0 8px #00ff00; }
+        .blink { animation: status-blink 1.5s infinite; }
+        @keyframes status-blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
+
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
         .timer-card { background: #1e1e1e; padding: 25px; border-radius: 12px; border-bottom: 12px solid #444; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; min-height: 200px; }
         
         .category { font-size: 1.4rem; text-transform: uppercase; color: #ffcc00; letter-spacing: 3px; margin-bottom: 5px; font-weight: 900; }
-        
-        /* Fixed alignment for belt names */
-        .division-name { 
-            font-size: 1.2rem; 
-            font-weight: bold; 
-            margin-bottom: 0px; 
-            line-height: 1.1; 
-            min-height: 3.5rem; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-        }
+        .division-name { font-size: 1.2rem; font-weight: bold; min-height: 3.5rem; display: flex; align-items: center; justify-content: center; line-height: 1.1; }
 
-        /* Narrower monospace font to prevent overflow */
-        .time-display { 
-            font-size: 4rem; 
-            font-weight: bold; 
-            margin: 10px 0 5px 0; 
-            font-family: 'Consolas', 'Monaco', 'Courier New', monospace; 
-            line-height: 1; 
+        .time-display { font-size: 4rem; font-weight: bold; margin: 10px 0; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; line-height: 1; }
+        
+        /* Pulse Animation */
+        .pulse-now { animation: pulse-effect 1s ease-in-out 5; }
+        @keyframes pulse-effect {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
         .deadline-label { font-size: 1.2rem; color: #aaa; margin-top: 10px; font-weight: 500; }
@@ -41,8 +38,7 @@
         .purple { border-color: #800080; }
         .brown-black { border-color: #4a3321; }
 
-        .info-box { max-width: 900px; margin: 50px auto; padding: 30px; background: #1a1a1a; border: 3px solid #ffcc00; border-radius: 15px; text-align: center; font-size: 1.4rem; line-height: 1.6; box-shadow: 0 0 20px rgba(255, 204, 0, 0.2); }
-        .info-box b { color: #ffcc00; text-transform: uppercase; text-decoration: underline; }
+        .info-box { max-width: 900px; margin: 50px auto; padding: 30px; background: #1a1a1a; border: 3px solid #ffcc00; border-radius: 15px; text-align: center; font-size: 1.4rem; line-height: 1.6; }
     </style>
 </head>
 <body>
@@ -50,6 +46,10 @@
     <header>
         <img src="https://bjjliitto.fi/vir_tied/SBJJL%20Logo.png" alt="FBJJF Logo" class="fed-logo">
         <h1>Open class registration</h1>
+        <div class="status-container">
+            <span id="status-dot" class="dot"></span>
+            <span id="status-text">Live Sync</span>
+        </div>
     </header>
 
     <div class="grid" id="timer-grid"></div>
@@ -71,6 +71,9 @@
             { id: 'f-pro', label: 'Female / Purple/Brown/Black belts Open', class: 'brown-black' }
         ];
 
+        // Track states for animation triggering
+        let previousStates = {};
+
         const grid = document.getElementById('timer-grid');
         divisions.forEach(div => {
             grid.innerHTML += `
@@ -81,9 +84,12 @@
                     <div class="deadline-label" id="${div.id}-label" style="visibility:hidden;">Closes at: <span id="${div.id}-deadline-text" class="deadline-time">--:--</span></div>
                 </div>
             `;
+            previousStates[div.id] = 'normal';
         });
 
         async function syncWithGoogleSheets() {
+            const dot = document.getElementById('status-dot');
+            dot.classList.add('blink');
             try {
                 const connector = SHEET_CSV_URL.includes('?') ? '&t=' : '?t=';
                 const response = await fetch(SHEET_CSV_URL + connector + new Date().getTime());
@@ -93,7 +99,6 @@
                 rows.forEach(row => {
                     const id = row[0] ? row[0].trim().toLowerCase() : null;
                     const time = row[1] ? row[1].trim() : null;
-                    
                     const textElem = document.getElementById(`${id}-deadline-text`);
                     const timerElem = document.getElementById(`${id}-timer`);
                     const labelElem = document.getElementById(`${id}-label`);
@@ -102,18 +107,26 @@
                         if (time && time.includes(':')) {
                             textElem.innerText = time;
                             labelElem.style.visibility = "visible";
-                            // Color is handled by updateTimers tick
                         } else {
                             textElem.innerText = "--:--";
                             labelElem.style.visibility = "hidden";
                             timerElem.innerText = id.includes('white') ? "SUNDAY" : "SATURDAY";
                             timerElem.style.color = "white";
+                            previousStates[id] = 'idle';
                         }
                     }
                 });
+                setTimeout(() => dot.classList.remove('blink'), 2000);
             } catch (e) {
                 console.warn("Sync error:", e);
+                dot.style.backgroundColor = "red";
             }
+        }
+
+        function triggerPulse(elem) {
+            elem.classList.remove('pulse-now');
+            void elem.offsetWidth; // Trigger reflow to restart animation
+            elem.classList.add('pulse-now');
         }
 
         function updateTimers() {
@@ -127,24 +140,29 @@
                 const [hours, minutes] = deadlineText.split(':');
                 const deadline = new Date();
                 deadline.setHours(parseInt(hours), parseInt(minutes), 0);
-
                 const diff = deadline - now;
 
-                if (diff <= 0) {
+                let currentState = 'normal';
+                if (diff <= 0) currentState = 'closed';
+                else if (diff <= 300000) currentState = 'warning';
+
+                // Trigger pulse on state change
+                if (currentState !== previousStates[div.id]) {
+                    if (currentState === 'warning' || currentState === 'closed') {
+                        triggerPulse(display);
+                    }
+                    previousStates[div.id] = currentState;
+                }
+
+                if (currentState === 'closed') {
                     display.innerHTML = "CLOSED";
-                    display.style.color = "#ff4444"; // Red
-                } else if (diff <= 300000) { // 5 Minute Warning
-                    const h = Math.floor(diff / 3600000);
-                    const m = Math.floor((diff % 3600000) / 60000);
-                    const s = Math.floor((diff % 60000) / 1000);
-                    display.innerHTML = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-                    display.style.color = "#ffff00"; // Yellow
+                    display.style.color = "#ff4444";
                 } else {
                     const h = Math.floor(diff / 3600000);
                     const m = Math.floor((diff % 3600000) / 60000);
                     const s = Math.floor((diff % 60000) / 1000);
                     display.innerHTML = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-                    display.style.color = "#00ff00"; // Green
+                    display.style.color = (currentState === 'warning') ? "#ffff00" : "#00ff00";
                 }
             });
         }
