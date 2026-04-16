@@ -3,8 +3,9 @@
 <head>
     <title>FBJJF Open Class Registration</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #121212; color: white; padding: 20px; margin: 0; padding-bottom: 80px; /* Space for ticker */ }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #121212; color: white; padding: 20px; margin: 0; }
         
+        /* HEADER CENTERED */
         header { 
             display: flex; 
             flex-direction: column; 
@@ -16,7 +17,14 @@
             padding-bottom: 20px; 
         }
         .fed-logo { height: 120px; width: auto; margin-bottom: 15px; }
-        h1 { text-align: center; font-size: 2.8rem; text-transform: uppercase; letter-spacing: 4px; margin: 0; color: #fff; }
+        h1 { 
+            text-align: center; 
+            font-size: 2.8rem; 
+            text-transform: uppercase; 
+            letter-spacing: 4px; 
+            margin: 0; 
+            color: #fff; 
+        }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
         .timer-card { background: #1e1e1e; padding: 25px; border-radius: 12px; border-bottom: 12px solid #444; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; min-height: 200px; }
@@ -27,65 +35,30 @@
         .deadline-label { font-size: 1.2rem; color: #aaa; margin-top: 10px; font-weight: 500; }
         .deadline-time { color: #fff; font-weight: bold; border-bottom: 1px dashed #444; }
         
+        /* Belt Styling */
         .white { border-color: #ffffff; }
         .blue { border-color: #2b59ff; }
         .purple { border-color: #800080; }
         .brown-black { border-color: #4a3321; }
 
-        /* ROLLING NEWS TICKER STYLING */
-        #ticker-wrap {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            overflow: hidden;
-            height: 60px;
-            background-color: #900; 
-            border-top: 3px solid #ff0000;
-            display: none; /* Hidden by default */
-            z-index: 9999;
-            align-items: center;
-        }
-
-        .ticker-move {
-            display: inline-block;
-            white-space: nowrap;
-            padding-right: 100%;
-            animation: marquee 25s linear infinite; /* Adjust 25s to change speed */
-            font-size: 1.8rem;
-            font-weight: bold;
-            line-height: 60px;
-            text-transform: uppercase;
-            color: #fff;
-        }
-
-        @keyframes marquee {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(-100%, 0); }
-        }
-
-        .info-box { max-width: 900px; margin: 30px auto; padding: 20px; background: #1a1a1a; border: 1px solid #333; border-radius: 10px; text-align: center; font-size: 1rem; color: #888; }
+        .info-box { max-width: 900px; margin: 50px auto; padding: 30px; background: #1a1a1a; border: 3px solid #ffcc00; border-radius: 15px; text-align: center; font-size: 1.4rem; line-height: 1.6; box-shadow: 0 0 20px rgba(255, 204, 0, 0.2); }
+        .info-box b { color: #ffcc00; text-transform: uppercase; text-decoration: underline; }
     </style>
 </head>
 <body>
 
     <header>
-        <img src="https://bjjliitto.fi/vir_tied/SBJJL%20Logo.png" alt="FBJJF Logo" class="fed-logo">
+        <img src="https://bjjliitto.fi/vir_tied/SBJJL%20Logo.png" alt="FBJJF Logo" alt="FBJJF Logo" class="fed-logo">
         <h1>Open class registration</h1>
     </header>
 
     <div class="grid" id="timer-grid"></div>
 
-    <div id="ticker-wrap">
-        <div class="ticker-move" id="ticker-text"></div>
-    </div>
-
     <div class="info-box">
-        ⚠️ <b>Registration Reminder:</b> Sign up at the weigh-in station after your first match.
+        ⚠️ <b>Open Class Registration:</b> Please head to the Weigh-in station to register <b>after</b> your first match. You must have competed in your division to be eligible.
     </div>
 
     <script>
-        // --- PASTE YOUR CSV LINK HERE ---
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQloAvzDzsFkly9zwBNwCMSsnmF68hfnKRQjKeu4P2r5zH6ksAwdkqua6UE8D36horq__hi0tKUbj8m/pub?output=csv';
 
         const divisions = [
@@ -119,35 +92,22 @@
 
                 rows.forEach(row => {
                     const id = row[0] ? row[0].trim().toLowerCase() : null;
-                    const val = row[1] ? row[1].trim() : null;
+                    const time = row[1] ? row[1].trim() : null;
                     
-                    // Handle Rolling Ticker logic
-                    if (id === 'announcement') {
-                        const tickerWrap = document.getElementById('ticker-wrap');
-                        const tickerText = document.getElementById('ticker-text');
-                        if (val && val.length > 1) {
-                            tickerWrap.style.display = "flex";
-                            // We repeat the text a few times so the "gap" isn't too large
-                            tickerText.innerText = `📢 ${val} \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0 📢 ${val} \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0 📢 ${val}`;
-                        } else {
-                            tickerWrap.style.display = "none";
-                        }
-                        return;
-                    }
-
                     const textElem = document.getElementById(`${id}-deadline-text`);
                     const timerElem = document.getElementById(`${id}-timer`);
                     const labelElem = document.getElementById(`${id}-label`);
 
                     if (id && textElem && timerElem) {
-                        if (val && val.includes(':')) {
-                            textElem.innerText = val;
+                        if (time && time.includes(':')) {
+                            textElem.innerText = time;
                             labelElem.style.visibility = "visible";
                             timerElem.style.color = "#00ff00"; 
                         } else {
                             textElem.innerText = "--:--";
                             labelElem.style.visibility = "hidden";
                             timerElem.style.color = "white";
+                            // LOGIC: White = SUNDAY, Others = SATURDAY
                             timerElem.innerText = id.includes('white') ? "SUNDAY" : "SATURDAY";
                         }
                     }
@@ -162,11 +122,13 @@
             divisions.forEach(div => {
                 const deadlineText = document.getElementById(`${div.id}-deadline-text`).innerText;
                 const display = document.getElementById(`${div.id}-timer`);
+
                 if (deadlineText === "--:--" || !deadlineText.includes(':')) return;
 
                 const [hours, minutes] = deadlineText.split(':');
                 const deadline = new Date();
                 deadline.setHours(parseInt(hours), parseInt(minutes), 0);
+
                 const diff = deadline - now;
 
                 if (diff <= 0) {
